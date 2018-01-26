@@ -16,6 +16,8 @@ from ufarray import *
 import os
 from random import choice
 from string import ascii_uppercase
+import tempfile
+import shutil
 
 def run(img):
     data = img.load()
@@ -128,17 +130,17 @@ def main():
     #year we are processing
     year = os.path.splitext(os.path.basename(sys.argv[1]))[0]
 
-    if not os.path.exists('output/' + year):
-        os.mkdir('output/' + year)
-    else:
-        os.system('rm -rf output/' + year + "/*")
+    if os.path.exists(os.path.join('output', year)):
+        shutil.rmtree(os.path.join('output', year))
+    os.mkdir(os.path.join('output', year))
+
     width, height = img.size
 
 
     #WORKAROUNDS to be changed for each new map set
     #img = img.crop((0,0,map_area_end,height))
+    #width, height = img.size
 
-    width, height = img.size
     img = img.convert('RGBA')
 
 
@@ -223,18 +225,24 @@ def main():
 
 
             random_name = ''.join(choice(ascii_uppercase) for i in range(12))
-            img_path = "output/" + year + "/" + random_name
+            img_path = os.path.join("output", year, random_name)
+            temp_image = f = tempfile.TemporaryFile()
 
-            # Edit your gdal translate, gdalwarp and gdal_edit commands according to your needs (like adding georeference points or an SRS) then uncomment
-            # translate_string = "gdal_translate -q -of GTiff " + img_path + ".png /tmp/rasterconversiontemp"
-            # warp_string = "gdalwarp -q -r cubicspline -tps -co COMPRESS=NONE  /tmp/rasterconversiontemp " + img_path + ".tiff"
-            # update_string = "gdal_edit.py " + img_path + ".tiff"
+
+            #Edit your gdal translate, gdalwarp and gdal_edit commands according to your needs (like adding georeference points or an SRS) then uncomment everythin below this
+            '''
+            translate_string = "gdal_translate -q -of GTiff " + img_path + ".png temp_image"
+            warp_string = "gdalwarp -q -r cubicspline -tps -co COMPRESS=NONE  temp_image " + img_path + ".tiff"
+            update_string = "gdal_edit.py " + img_path + ".tiff"
+            '''
+
+
             #label_img.save(img_path + ".png", "PNG")
             #os.system(translate_string)
             #os.system(warp_string)
             #os.system(update_string)
-            #os.system("gdal_polygonize.py " +  img_path + ".tiff" + " -f  ESRI\ Shapefile " + "output/" + year + "/" + random_name + ".shp")
-            #os.system("rm output/" + year + "/" + random_name + ".tiff")
-            #os.system("rm output/" + year + "/" + random_name + ".png")
+            #os.system("gdal_polygonize.py " +  img_path + ".tiff" + " -f  ESRI\ Shapefile " + os.path.join("output", year, random_name) +  ".shp")
+            #os.remove(os.path.join("output", year, random_name) + ".tiff")
+            #os.remove(os.path.join("output", year, random_name) + ".png")
 
 if __name__ == "__main__": main()
